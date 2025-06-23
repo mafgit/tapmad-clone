@@ -14,7 +14,7 @@ import {
 
 const Footer = () => {
   return (
-    <div className="flex items-center justify-around p-[20px] py-[30px] bg-[#26282e]">
+    <div className="flex items-center justify-around p-[20px] py-[30px] bg-[#1d1f24fa]">
       <div className="flex flex-col justify-center items-start gap-4">
         <h2 className="text-xl font-bold">Connect with us</h2>
         <div className="flex gap-2 items-center justify-around">

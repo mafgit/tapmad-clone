@@ -12,7 +12,7 @@ const Slider = ({ cards }: { cards: ICard[] }) => {
     <div className="mb-6 relative">
       {cards.length ? (
         <>
-          <div className="absolute top-1/2 left-[10px] z-10 -translate-y-1/2">
+          <div className="perspective-distant absolute top-1/2 left-[10px] z-10 -translate-y-1/2">
             <button className="slider-prev-btn flex justify-center items-center w-[40px] h-[40px] bg-black/60 text-xl rounded-full cursor-pointer ">
               <FaChevronLeft />
             </button>
@@ -21,6 +21,7 @@ const Slider = ({ cards }: { cards: ICard[] }) => {
             modules={[Navigation, Autoplay]}
             slidesPerView={3}
             spaceBetween={10}
+            className="w-[105vw] relative left-[-2.5vw]"
             pagination={{ clickable: true }}
             navigation={{
               nextEl: ".slider-next-btn",

@@ -6,7 +6,7 @@ import ICard from "@/app/models/ICard";
 import NarrowRowCard from "./NarrowRowCard";
 import Link from "next/link";
 
-export default ({
+const Row = ({
   title,
   cards,
   row_type,
@@ -84,3 +84,5 @@ export default ({
     </div>
   );
 };
+
+export default Row

@@ -59,3 +59,10 @@ a {
 .one-card {
   scroll-snap-align: center;
 }
+
+img {
+  /* text-rendering: optimizeLegibility;
+  image-rendering: crisp-edges; */
+  object-fit: cover;
+  object-position: center;
+}

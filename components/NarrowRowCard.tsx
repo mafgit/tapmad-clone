@@ -2,7 +2,7 @@ import ICard from "@/app/models/ICard";
 import Image from "next/image";
 import { toNormalDate } from "./SliderCard";
 
-export default ({ card }: { card: ICard }) => {
+const NarrowRowCard = ({ card }: { card: ICard }) => {
   return (
     <div className="one-card flex flex-col gap-1 min-w-[200x] w-[200px] h-[300px] relative hover:scale-x-110 origin-center hover:z-50 duration-400 hover:mx-[20px] transition-all cursor-pointer rounded-xl">
       <Image
@@ -22,3 +22,5 @@ export default ({ card }: { card: ICard }) => {
     </div>
   );
 };
+
+export default NarrowRowCard;
