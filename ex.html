@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .progress {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .outside {
+        width: 30px;
+        height: 5px;
+        border-radius: 4px;
+        background-color: black;
+        /* z-index: 10; */
+      }
+
+      .inside {
+        /* width: 100%; */
+        width: 0;
+        border-radius: 4px;
+        height: 100%;
+        background-color: lightgreen;
+        /* z-index: 20; */
+      }
+
+      @keyframes progress-animation {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+
+      .inside-animated {
+        animation: progress-animation 300ms ease-in-out forwards;
+      }
+
+      .circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: white;
+        border: 2px solid black;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container {
+        width: min-content;
+        margin: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .circle::after {
+        content: "";
+        position: absolute;
+        bottom: -20px;
+        font-size: 12px;
+        width: max-content;
+        height: min-content;
+        white-space: nowrap;
+        display: block;
+      }
+
+      .circle:nth-of-type(1)::after {
+        content: "Step 1";
+      }
+
+      .circle:nth-of-type(3)::after {
+        content: "Step 2";
+      }
+
+      .circle.done {
+        background: lightgreen;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="circle"></div>
+      <div class="progress">
+        <div class="outside">
+          <div class="inside"></div>
+        </div>
+        <div class="outside">
+          <div class="inside"></div>
+        </div>
+        <div class="outside">
+          <div class="inside"></div>
+        </div>
+        <div class="outside">
+          <div class="inside"></div>
+        </div>
+        <div class="outside">
+          <div class="inside"></div>
+        </div>
+      </div>
+      <div class="circle"></div>
+    </div>
+
+    <script>
+      const circles = document.querySelectorAll(".circle");
+      const insides = document.querySelectorAll(".inside");
+      const dashes_in_one = 5;
+
+      let i = 0;
+      let c = -1;
+      const animate = () => {
+        if (i % dashes_in_one === 0) {
+          c++;
+        }
+        circles[c].classList.add("done");
+        insides[i].classList.add("inside-animated");
+        i++;
+        if (i < insides.length)
+          setTimeout(() => {
+            animate();
+          }, 300);
+        else {
+          c++;
+          setTimeout(() => {
+            circles[c].classList.add("done");
+          }, 300);
+        }
+      };
+
+      animate();
+    </script>
+  </body>
+</html>

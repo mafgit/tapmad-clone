@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #131417;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -14,7 +14,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #131417;
     --foreground: #ededed;
   }
 }
@@ -23,4 +23,39 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  /* min-height: calc(100vh - 150px); */
+}
+
+.cards-row::-webkit-scrollbar {
+  display: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover,
+a:hover {
+  filter: hue-rotate(20deg);
+  transform: scale(1.05);
+}
+
+a {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+/* img {
+  filter: contrast(1.25) saturate(1.5);
+} */
+
+.one-row {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.one-card {
+  scroll-snap-align: center;
 }
