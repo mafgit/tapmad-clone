@@ -66,3 +66,8 @@ img {
   object-fit: cover;
   object-position: center;
 }
+
+#video-player {
+
+  border-radius: 10px !important;
+}
