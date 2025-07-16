@@ -6,5 +6,9 @@ export default interface ICard {
   start_date?: string;
   end_date?: string;
   date_time?: string;
+  is_video?: boolean;
+  is_live?: boolean
+  id: string;
+  long_description?: string
 }
 

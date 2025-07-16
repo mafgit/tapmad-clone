@@ -1,5 +1,5 @@
 "use client";
-import ICard from "@/app/models/ICard";
+import ICard from "@/models/ICard";
 import Image from "next/image";
 
 export const toNormalDate = (date: string, year: boolean = false) => {

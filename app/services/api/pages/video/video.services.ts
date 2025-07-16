@@ -20,6 +20,8 @@ export const sendAnalytics = async ({
   position,
   videoDuration,
   lastReference,
+  totalTimePlayed,
+  currentDate,
 }: {
   videoId: string;
   userId: string;
@@ -28,28 +30,31 @@ export const sendAnalytics = async ({
   position: number;
   videoDuration: number;
   lastReference: number | null;
+  totalTimePlayed: number;
+  currentDate: number;
 }) => {
   try {
     const url = endpoint + "/" + videoId.trim();
-    let duration = 0;
     if (lastReference) {
-      duration = (Date.now() - lastReference) / 1000
+      const duration = (currentDate - lastReference) / 1000;
+      const res = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+          videoId,
+          userId,
+          deviceId,
+          platform,
+          position: Math.round(position),
+          duration: Math.round(duration),
+          totalTimePlayed: Math.round(totalTimePlayed / 1000),
+          videoDuration: Math.round(videoDuration),
+        }),
+      });
+      const data = await res.json();
+      return data;
+    } else {
+      return {};
     }
-
-    const res = await fetch(url, {
-      method: "POST",
-      body: JSON.stringify({
-        videoId,
-        userId,
-        deviceId,
-        platform,
-        position: Math.round(position),
-        duration: Math.round(duration),
-        videoDuration: Math.round(videoDuration),
-      }),
-    });
-    const data = await res.json();
-    return data;
   } catch (e) {
     console.log(e);
     return { error: e };

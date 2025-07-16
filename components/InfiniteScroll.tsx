@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { getRows } from "../app/services/api/pages/home/home.services";
-import IRow from "../app/models/IRow";
+import IRow from "../models/IRow";
 import Row from "@/components/Row";
 import Slider from "@/components/Slider";
-import ICard from "../app/models/ICard";
+import ICard from "../models/ICard";
 
 const InfiniteScroll = ({
   sliderCards,

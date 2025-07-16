@@ -9,8 +9,8 @@ declare global {
   }
 }
 
-const LIVE_INTERVAL_DURATION = 10000;
-const NORMAL_INTERVAL_DURATION = 5000;
+const LIVE_TIMEOUT_DURATION = 10000;
+const NORMAL_TIMEOUT_DURATION = 10000;
 
 const generateRandomId = () => {
   let chars = "abcdefghijklmnopqrstuvwxyz-0123456789";
@@ -38,15 +38,17 @@ const JWPlayer = ({
   id: string;
 }) => {
   const videoPlayerRef = useRef<HTMLDivElement | null>(null);
-  const interval = useRef<NodeJS.Timeout | null>(null);
+  const timeout = useRef<NodeJS.Timeout | null>(null);
   const lastReference = useRef<number | null>(null);
+  const playerCopy = useRef<any>(null);
+  const isPaused = useRef<boolean>(true);
+  const totalTimePlayed = useRef(0);
+  const MAX_VIDEO_COOKIES = 2;
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
-
-    console.log("asdasdasd", live);
 
     const userId = generateRandomId();
     const deviceId = generateRandomId();
@@ -66,93 +68,195 @@ const JWPlayer = ({
     function initializePlayer() {
       if (window.jwplayer && videoPlayerRef.current) {
         const player = window.jwplayer(videoPlayerRef.current);
+        playerCopy.current = player;
 
         player.setup({
           file,
           image,
-          width: "80%",
+          width: "100%",
           aspectratio,
           autostart: false,
         });
 
-        const intervalDuration = live
-          ? LIVE_INTERVAL_DURATION
-          : NORMAL_INTERVAL_DURATION;
-        console.log("bbbbbbb", intervalDuration);
+        const timeoutDuration = live
+          ? LIVE_TIMEOUT_DURATION
+          : NORMAL_TIMEOUT_DURATION;
 
-        async function onPlay() {
-          lastReference.current = Date.now();
+        const readCookie = () => {
+          if (live) return;
+          const splitted = document.cookie.split("; ");
+          if (splitted.length > 0) {
+            for (const word of splitted) {
+              console.log(word);
+              if (word.startsWith(`position_${id}=`)) {
+                const wordSplitted = word.split("=");
+                if (wordSplitted.length === 2) {
+                  player.seek(parseInt(wordSplitted[1].split(",")[0]));
+                }
+              }
+            }
+          }
+        };
 
-          interval.current = setInterval(async () => {
+        player.on("ready", () => {
+          readCookie();
+
+          function stopAnalytics() {
+            if (timeout.current) {
+              clearTimeout(timeout.current);
+            }
+            timeout.current = null;
+            lastReference.current = null;
+          }
+
+          async function onPlay() {
+            isPaused.current = false;
+            async function recursive() {
+              stopAnalytics();
+              const currentDate = Date.now();
+              lastReference.current = currentDate;
+
+              timeout.current = setTimeout(async () => {
+                const currentDate = Date.now();
+                totalTimePlayed.current += lastReference.current
+                  ? currentDate - lastReference.current
+                  : 0;
+
+                const args = {
+                  videoId: id,
+                  userId,
+                  deviceId,
+                  platform: "web",
+                  position: player.getPosition(),
+                  totalTimePlayed: totalTimePlayed.current,
+                  videoDuration: player.getDuration(),
+                  lastReference: lastReference.current,
+                  currentDate,
+                };
+
+                await sendAnalytics(args);
+                return await recursive();
+              }, timeoutDuration);
+            }
+
+            await recursive();
+          }
+
+          player.on("play", onPlay);
+          // player.on("time", (e: any) => {
+          //   console.log(e)
+          // });
+
+          player.on("pause", async () => {
+            isPaused.current = true;
+            const currentDate = Date.now();
+            totalTimePlayed.current += lastReference.current
+              ? currentDate - lastReference.current
+              : 0;
+
             const args = {
               videoId: id,
               userId,
               deviceId,
               platform: "web",
               position: player.getPosition(),
+              totalTimePlayed: totalTimePlayed.current,
               videoDuration: player.getDuration(),
               lastReference: lastReference.current,
+              currentDate,
             };
             await sendAnalytics(args);
-            lastReference.current = Date.now();
-          }, intervalDuration);
-        }
+            lastReference.current = null;
+            stopAnalytics();
+          });
 
-        player.on("play", onPlay);
-        // player.on("time", (e: any) => {
-        //   console.log(e)
-        // });
+          player.on("error", (e: any) => {
+            console.log(e);
+            stopAnalytics();
+          });
 
-        player.on("pause", async () => {
-          if (interval.current) clearInterval(interval.current);
-          const args = {
-            videoId: id,
-            userId,
-            deviceId,
-            platform: "web",
-            position: player.getPosition(),
-            videoDuration: player.getDuration(),
-            lastReference: lastReference.current,
-          };
-          await sendAnalytics(args);
-          lastReference.current = null;
+          player.on("seek", async () => {
+            const currentDate = Date.now();
+            totalTimePlayed.current += lastReference.current
+              ? currentDate - lastReference.current
+              : 0;
+            stopAnalytics();
+          });
+
+          player.on("seeked", async () => {});
         });
-
-        player.on("error", (e: any) => {
-          console.log(e);
-          if (interval.current) {
-            clearInterval(interval.current);
-            interval.current = null;
-          }
-          lastReference.current = null;
-        });
-
-        player.on("seek", async () => {
-          if (interval.current) {
-            clearInterval(interval.current);
-            interval.current = null;
-          }
-          lastReference.current = null;
-        });
-
-        player.on("seeked", onPlay);
       }
     }
 
-    return () => {
-      if (window.jwplayer) {
-        const player = window.jwplayer(videoPlayerRef.current);
-        if (player) {
-          player.off("play");
-          player.off("pause");
-          player.off("seek");
-          player.off("seeked");
-          player.off("error");
-          if (interval.current) {
-            clearInterval(interval.current);
-            interval.current = null;
+    return () => {};
+  }, [id]);
+
+  useEffect(() => {
+    function saveCookie() {
+      const player = playerCopy.current;
+      if (!player || live) {
+        return;
+      }
+
+      const splitted = document.cookie.split("; ");
+      let oldestDateAdded = Infinity;
+      let oldestVideoId = "";
+      let totalVideoCookies = 0;
+
+      if (splitted.length > 0) {
+        for (const word of splitted) {
+          if (word.startsWith(`position_`)) {
+            totalVideoCookies++;
+            const wordSplitted = word.split("=");
+            if (wordSplitted.length === 2) {
+              const key = wordSplitted[0];
+              const value = wordSplitted[1];
+              const dateAdded = parseInt(value[1]);
+              if (dateAdded < oldestDateAdded) {
+                oldestDateAdded = dateAdded;
+                oldestVideoId = key.split("_")[1];
+              }
+            }
           }
         }
+      }
+
+      console.log("odldest", oldestVideoId);
+
+      if (totalVideoCookies >= MAX_VIDEO_COOKIES) {
+        if (oldestVideoId && oldestVideoId !== id)
+          document.cookie = `position_${oldestVideoId}=; path=/video; max-age=0`;
+      }
+
+      if (
+        !live &&
+        playerCopy.current &&
+        typeof playerCopy.current.getPosition === "function"
+      ) {
+        const pos = Math.floor(playerCopy.current.getPosition());
+        document.cookie = `position_${id}=${pos},${Math.round(
+          Date.now() / 1000
+        )}; path=/video; max-age=604800`;
+      }
+    }
+
+    window.addEventListener("beforeunload", saveCookie);
+
+    return () => {
+      window.removeEventListener("beforeunload", saveCookie);
+      const player = playerCopy.current;
+      saveCookie();
+      if (player) {
+        player.off("play");
+        player.off("pause");
+        player.off("seek");
+        player.off("seeked");
+        player.off("error");
+        if (timeout.current) {
+          clearTimeout(timeout.current);
+          timeout.current = null;
+        }
+        player.remove?.();
       }
     };
   }, []);

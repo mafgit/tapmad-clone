@@ -1,7 +1,7 @@
 'use client'
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
-import ICard from "@/app/models/ICard";
+import ICard from "@/models/ICard";
 import SliderCard from "./SliderCard";
 import "swiper/css/navigation";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";

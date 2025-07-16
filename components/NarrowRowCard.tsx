@@ -1,4 +1,4 @@
-import ICard from "@/app/models/ICard";
+import ICard from "@/models/ICard";
 import Image from "next/image";
 import { toNormalDate } from "./SliderCard";
 

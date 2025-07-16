@@ -1,8 +1,8 @@
-'use client'
+"use client";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import WideRowCard from "./WideRowCard";
 import { useRef } from "react";
-import ICard from "@/app/models/ICard";
+import ICard from "@/models/ICard";
 import NarrowRowCard from "./NarrowRowCard";
 import Link from "next/link";
 
@@ -10,13 +10,15 @@ const Row = ({
   title,
   cards,
   row_type,
-  row_i,
+  row_i
 }: {
   title: string;
   cards: ICard[];
   row_type: string;
   row_i: number;
 }) => {
+  console.log(title, cards, row_type, row_i);
+
   const rowRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -85,4 +87,4 @@ const Row = ({
   );
 };
 
-export default Row
+export default Row;

@@ -38,7 +38,7 @@ button {
 }
 
 button:hover,
-a:hover {
+a:not(.one-card):hover {
   filter: hue-rotate(20deg);
   transform: scale(1.05);
 }
@@ -68,6 +68,18 @@ img {
 }
 
 #video-player {
-
   border-radius: 10px !important;
+}
+
+@keyframes anim {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.anim-inner {
+  animation: anim 1s ease-in-out infinite;
 }
